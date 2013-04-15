@@ -71,31 +71,18 @@ public abstract class AisTarget implements Serializable {
     public void update(AisMessage aisMessage) {
         // Set MMSI
         this.mmsi = aisMessage.getUserId();
+        
         // Set source data
         if (sourceData == null) {
             sourceData = new AisTargetSourceData();
         }
-
-        String sourceRegion = null;
-        // Get source region from Gatehouse tag
-        if (aisMessage.getTags() != null) {
-            for (IProprietaryTag tag : aisMessage.getTags()) {
-                if (tag instanceof GatehouseSourceTag) {
-                    GatehouseSourceTag ghTag = (GatehouseSourceTag) tag;
-                    sourceRegion = ghTag.getRegion();
-                }
-            }
-        }
+        sourceData.update(aisMessage);
         
         this.lastReport = aisMessage.getVdm().getTimestamp();  
         if (this.lastReport == null) {
             this.lastReport = new Date();
         }
         
-        sourceData.setTagging(AisPacketTagging.parse(aisMessage.getVdm()));
-        sourceData.setSourceRegion(sourceRegion);
-        sourceData.setLastReport(this.lastReport);
-
         // Set country
         country = Country.getCountryForMmsi(aisMessage.getUserId());
     }

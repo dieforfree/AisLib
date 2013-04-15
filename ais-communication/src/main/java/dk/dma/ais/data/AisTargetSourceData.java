@@ -18,8 +18,11 @@ package dk.dma.ais.data;
 import java.io.Serializable;
 import java.util.Date;
 
+import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.packet.AisPacketTagging;
 import dk.dma.ais.packet.AisPacketTagging.SourceType;
+import dk.dma.ais.proprietary.GatehouseSourceTag;
+import dk.dma.ais.proprietary.IProprietaryTag;
 
 /**
  * Class to data about the source of an AIS target
@@ -30,17 +33,30 @@ public class AisTargetSourceData implements Serializable {
 
     private AisPacketTagging tagging = new AisPacketTagging();
     private String sourceRegion;
-    private Date lastReport;
     private Date created;
 
     public AisTargetSourceData() {
         this.created = new Date();
     }
-    
+
+    public void update(AisMessage aisMessage) {
+        this.sourceRegion = null;
+        // Get source region from Gatehouse tag
+        if (aisMessage.getTags() != null) {
+            for (IProprietaryTag tag : aisMessage.getTags()) {
+                if (tag instanceof GatehouseSourceTag) {
+                    GatehouseSourceTag ghTag = (GatehouseSourceTag) tag;
+                    this.sourceRegion = ghTag.getRegion();
+                }
+            }
+        }
+        this.tagging = AisPacketTagging.parse(aisMessage.getVdm());
+    }
+
     public AisPacketTagging getTagging() {
         return tagging;
     }
-    
+
     public void setTagging(AisPacketTagging tagging) {
         this.tagging = tagging;
     }
@@ -51,15 +67,6 @@ public class AisTargetSourceData implements Serializable {
 
     public void setSourceRegion(String sourceRegion) {
         this.sourceRegion = sourceRegion;
-    }
-
-    
-    public Date getLastReport() {
-        return lastReport;
-    }
-
-    public void setLastReport(Date lastReport) {
-        this.lastReport = lastReport;
     }
 
     public Date getCreated() {
@@ -74,7 +81,7 @@ public class AisTargetSourceData implements Serializable {
         SourceType sourceType = tagging.getSourceType();
         return sourceType != null && sourceType == SourceType.SATELLITE;
     }
-    
+
     public String getSourceType() {
         SourceType sourceType = tagging.getSourceType();
         if (sourceType != null && sourceType == SourceType.SATELLITE) {
