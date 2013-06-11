@@ -36,8 +36,7 @@ import dk.dma.enav.model.geometry.Position;
 import dk.dma.enav.model.geometry.PositionTime;
 
 /**
- * Encapsulation of the VDM lines containing a single AIS message including leading proprietary tags and comment/tag
- * blocks.
+ * Encapsulation of the VDM lines containing a single AIS message including leading proprietary tags and comment/tag blocks.
  * 
  * @author Kasper Nielsen
  */
@@ -51,12 +50,12 @@ public class AisPacket implements Comparable<AisPacket> {
     public AisPacket(String stringMessage) {
         this(stringMessage, System.currentTimeMillis());
     }
-    
+
     public AisPacket(String stringMessage, long receiveTimestamp) {
         this.rawMessage = requireNonNull(stringMessage);
         this.receiveTimestamp = receiveTimestamp;
     }
-    
+
     public AisPacket(Vdm vdm, String stringMessage) {
         this(vdm, stringMessage, System.currentTimeMillis());
     }
@@ -96,7 +95,7 @@ public class AisPacket implements Comparable<AisPacket> {
     public String getStringMessage() {
         return rawMessage;
     }
-    
+
     public List<String> getStringMessageLines() {
         return Arrays.asList(rawMessage.split("\\r?\\n"));
     }
@@ -175,11 +174,11 @@ public class AisPacket implements Comparable<AisPacket> {
         return null;
 
     }
-    
+
     public static AisPacket from(String stringMessage, long receiveTimestamp) {
         return new AisPacket(stringMessage, receiveTimestamp);
     }
-    
+
     public static AisPacket from(String stringMessage) {
         return new AisPacket(stringMessage, System.currentTimeMillis());
     }
@@ -187,6 +186,14 @@ public class AisPacket implements Comparable<AisPacket> {
     /** {@inheritDoc} */
     @Override
     public int compareTo(AisPacket p) {
-        return Long.compare(getTimestamp().getTime(), p.getTimestamp().getTime());
+        Date t1 = getTimestamp();
+        Date t2 = p.getTimestamp();
+        if (t2 == null) {
+            return -1;
+        }
+        if (t1 == null) {
+            return 1;
+        }
+        return t1.compareTo(t2);
     }
 }
